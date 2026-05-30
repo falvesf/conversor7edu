@@ -384,6 +384,14 @@ export default function App() {
 
   // Pagination Logic
   const totalPages = Math.ceil(finalFilteredContacts.length / pageSize) || 1;
+
+  // Auto-reset page if filters/search leave the current page out of bounds
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
+
   const paginatedContacts = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return finalFilteredContacts.slice(start, start + pageSize);
