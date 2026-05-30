@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { 
   Upload, 
@@ -25,10 +25,15 @@ import {
 
 export default function App() {
   // Theme state
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('conversor7edu_theme');
+    return (saved === 'dark' || saved === 'light') ? saved : 'light';
+  });
 
   // App core state
-  const [selectedUnitCode, setSelectedUnitCode] = useState<string>('2101');
+  const [selectedUnitCode, setSelectedUnitCode] = useState<string>(() => {
+    return localStorage.getItem('conversor7edu_selectedUnitCode') || '2101';
+  });
   const [fileName, setFileName] = useState<string>('');
   const [fileSize, setFileSize] = useState<string>('');
   const [fileDate, setFileDate] = useState<string>('');
@@ -37,10 +42,22 @@ export default function App() {
   const [missingCols, setMissingCols] = useState<string[]>([]);
   
   // Filters state
-  const [filterPais, setFilterPais] = useState<boolean>(true);
-  const [filterMaes, setFilterMaes] = useState<boolean>(true);
-  const [filterRL, setFilterRL] = useState<boolean>(true);
-  const [filterRF, setFilterRF] = useState<boolean>(true);
+  const [filterPais, setFilterPais] = useState<boolean>(() => {
+    const saved = localStorage.getItem('conversor7edu_filterPais');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [filterMaes, setFilterMaes] = useState<boolean>(() => {
+    const saved = localStorage.getItem('conversor7edu_filterMaes');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [filterRL, setFilterRL] = useState<boolean>(() => {
+    const saved = localStorage.getItem('conversor7edu_filterRL');
+    return saved !== null ? saved === 'true' : true;
+  });
+  const [filterRF, setFilterRF] = useState<boolean>(() => {
+    const saved = localStorage.getItem('conversor7edu_filterRF');
+    return saved !== null ? saved === 'true' : true;
+  });
   
   // Search and Pagination
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -56,11 +73,35 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
+  // Sync settings to localStorage
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_selectedUnitCode', selectedUnitCode);
+  }, [selectedUnitCode]);
+
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_filterPais', String(filterPais));
+  }, [filterPais]);
+
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_filterMaes', String(filterMaes));
+  }, [filterMaes]);
+
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_filterRL', String(filterRL));
+  }, [filterRL]);
+
+  useEffect(() => {
+    localStorage.setItem('conversor7edu_filterRF', String(filterRF));
+  }, [filterRF]);
+
   // Toggle Theme
   const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   // VBA Helper - reduzir_campo_telefone (100% validated logic matching MS Access dead-path behavior)
